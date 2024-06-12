@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Webcam Capture</title>
+  </head>
+  <body>
+    <div>
+      <h1>Webcam Capture</h1>
+      <a href="/test2.html" style="font-size: 24px">Test 2</a>
+    </div>
+    <video id="videoElement" autoplay></video>
+    <button id="startButton">Start Webcam</button>
+    <button id="stopButton" disabled>Stop Webcam</button>
+    <button id="captureButton" disabled>Capture Photo</button>
+    <canvas id="canvasElement" style="display: none"></canvas>
+    <img id="photoElement" style="display: none; margin-top: 24px" />
+    <div id="base64Value" style="display: none; margin: 24px; max-width: 90vw; text-wrap: wrap;overflow-x: scroll;" ></div>
+
+    <!-- JavaScript code will go here -->
+    <script>
+      const videoElement = document.getElementById("videoElement");
+      const canvasElement = document.getElementById("canvasElement");
+      const photoElement = document.getElementById("photoElement");
+      const startButton = document.getElementById("startButton");
+      const stopButton = document.getElementById("stopButton");
+      const captureButton = document.getElementById("captureButton");
+      const base64Value = document.getElementById("base64Value");
+
+      let stream;
+
+      async function startWebcam() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          videoElement.srcObject = stream;
+          startButton.disabled = true;
+          stopButton.disabled = false;
+          captureButton.disabled = false;
+        } catch (error) {
+          console.error("Error accessing webcam:", error);
+        }
+      }
+
+      async function stopWebcam() {
+        if (stream) {
+          // Check if stream exists
+          stream.getTracks().forEach((track) => track.stop());
+        }
+        // Optionally reset video element source and button states
+        videoElement.srcObject = null;
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        captureButton.disabled = true;
+      }
+
+      //   function stopWebcam() {
+      //     // Pause the video stream
+      //     videoElement.pause();
+
+      //     console.log("test");
+      //     // videoElement.srcObject = null;
+      //     stopButton.disabled = true;
+      //     startButton.disabled = false;
+
+      //     // Stop the webcam stream
+      //     navigator.mediaDevices
+      //       .getUserMedia({ video: true })
+      //       .then((stream) => {
+      //         stream.getTracks().forEach((track) => track.stop());
+      //         console.log("abc");
+      //       })
+      //       .catch((error) => {
+      //         console.error("Error stopping webcam:", error);
+      //       });
+      //   }
+
+      startButton.addEventListener("click", startWebcam);
+      stopButton.addEventListener("click", stopWebcam);
+
+      function capturePhoto() {
+        canvasElement.width = videoElement.videoWidth;
+        canvasElement.height = videoElement.videoHeight;
+        canvasElement.getContext("2d").drawImage(videoElement, 0, 0);
+        const photoDataUrl = canvasElement.toDataURL("image/jpeg");
+        photoElement.src = photoDataUrl;
+        console.log({ photoDataUrl });
+        // console.log(typeof(photoDataUrl));
+        photoElement.style.display = "block";
+        base64Value.innerText = "Latest: " + photoDataUrl;
+        base64Value.style.display='block'
+      }
+
+      captureButton.addEventListener("click", capturePhoto);
+    </script>
+  </body>
+</html>
